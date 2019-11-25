@@ -1,0 +1,49 @@
+name: golanci-lint
+on: [push]
+jobs:
+  # NOTE: golangci-lint doesn't report multiple errors on the same line from
+  # different linters and just report one of the errors?
+
+  golangci-lint-prebuilt:
+    name: runner / golangci-lint (pre-build docker image)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v1
+      - name: golangci-lint
+        uses: docker://kyoh86/action-golangci-lint:v1 # Pre-built image
+        with:
+          golangci_lint_flags: "--config=.github/.golangci.yml ./testdata"
+
+  golangci-lint-dockerfile:
+    name: runner / golangci-lint (Dockerfile)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v1
+      - name: golangci-lint w/ Dockerfile
+        uses: kyoh86/action-golangci-lint@v1 # Build with Dockerfile
+        with:
+          golangci_lint_flags: "./testdata"
+
+  golint:
+    name: runner / golint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v1
+      - name: golint
+        uses: docker://kyoh86/action-golangci-lint:v1
+        with:
+          golangci_lint_flags: "--disable-all -E golint ./testdata"
+
+  golangci-lint-all-in-one:
+    name: runner / golangci-lint-all-in-one
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v1
+      - name: golangci-lint (All-In-One config)
+        uses: docker://kyoh86/action-golangci-lint:v1
+        with:
+          golangci_lint_flags: "--enable-all --exclude-use-default=false ./testdata"

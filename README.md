@@ -1,23 +1,13 @@
-# GitHub Action: Run golangci-lint with reviewdog
+# GitHub Action: Run golangci-lint
 
-[![Docker Image CI](https://github.com/reviewdog/action-golangci-lint/workflows/Docker%20Image%20CI/badge.svg)](https://github.com/reviewdog/action-golangci-lint/actions)
-[![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/reviewdog/action-golangci-lint)](https://hub.docker.com/r/reviewdog/action-golangci-lint)
-[![Docker Pulls](https://img.shields.io/docker/pulls/reviewdog/action-golangci-lint)](https://hub.docker.com/r/reviewdog/action-golangci-lint)
-[![Release](https://img.shields.io/github/release/reviewdog/action-golangci-lint.svg?maxAge=43200)](https://github.com/reviewdog/action-golangci-lint/releases)
+[![Docker Image CI](https://github.com/kyoh86/action-golangci-lint/workflows/Docker%20Image%20CI/badge.svg)](https://github.com/kyoh86/action-golangci-lint/actions)
+[![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/kyoh86/action-golangci-lint)](https://hub.docker.com/r/kyoh86/action-golangci-lint)
+[![Docker Pulls](https://img.shields.io/docker/pulls/kyoh86/action-golangci-lint)](https://hub.docker.com/r/kyoh86/action-golangci-lint)
+[![Release](https://img.shields.io/github/release/kyoh86/action-golangci-lint.svg?maxAge=43200)](https://github.com/kyoh86/action-golangci-lint/releases)
 
-This action runs [golangci-lint](https://github.com/golangci/golangci-lint) with
-[reviewdog](https://github.com/reviewdog/reviewdog) on pull requests to improve
-code review experience.
-
-[![annotation on diff tab example](https://user-images.githubusercontent.com/3797062/64919877-27692780-d7eb-11e9-9791-1e9933fbb132.png)](https://github.com/reviewdog/action-golangci-lint/pull/10/files#annotation_6204126662041266)
-[![check tab example](https://user-images.githubusercontent.com/3797062/64919922-d279e100-d7eb-11e9-800d-9cef86c670df.png)](https://github.com/reviewdog/action-golangci-lint/pull/10/checks?check_run_id=222708776)
-[![status check example](https://user-images.githubusercontent.com/3797062/64919933-0b19ba80-d7ec-11e9-96cc-f6558f04924f.png)](https://github.com/reviewdog/action-golangci-lint/pull/10)
+This action runs [golangci-lint](https://github.com/golangci/golangci-lint)
 
 ## Inputs
-
-### `github_token`
-
-**Required**. Must be in form of `github_token: ${{ secrets.github_token }}`'.
 
 ### `golangci_lint_flags`
 
@@ -27,25 +17,15 @@ Optional. golangci-lint flags. (golangci-lint run --out-format=line-number
 Note that you can change golangci-lint behavior by [configuration
 file](https://github.com/golangci/golangci-lint#configuration) too.
 
-### `tool_name`
-
-Optional. Tool name to use for reviewdog reporter. Useful when running multiple
-actions with different config.
-
-### `level`
-
-Optional. Report level for reviewdog [info,warning,error].
-It's same as `-level` flag of reviewdog.
-
 ## Example usage
 
 ### Minimum Usage Example
 
-#### [.github/workflows/reviewdog.yml](.github/workflows/reviewdog.yml)
+#### [.github/workflows/linter.yml](.github/workflows/linter.yml)
 
 ```yml
-name: reviewdog
-on: [pull_request]
+name: linter
+on: [push]
 jobs:
   golangci-lint:
     name: runner / golangci-lint
@@ -54,41 +34,43 @@ jobs:
       - name: Check out code into the Go module directory
         uses: actions/checkout@v1
       - name: golangci-lint
-        uses: reviewdog/action-golangci-lint@v1
-        # uses: docker://reviewdog/action-golangci-lint:v1 # pre-build docker image
-        with:
-          github_token: ${{ secrets.github_token }}
+        uses: kyoh86/action-golangci-lint@v1
+        # uses: docker://kyoh86/action-golangci-lint:v1 # pre-build docker image
 ```
 
 ### Advanced Usage Example
 
-#### [.github/workflows/reviewdog.yml](.github/workflows/reviewdog.yml)
+#### [.github/workflows/linter.yml](.github/workflows/linter.yml)
 
 ```yml
-name: reviewdog
-on: [pull_request]
+name: golanci-lint
+on: [push]
 jobs:
   # NOTE: golangci-lint doesn't report multiple errors on the same line from
   # different linters and just report one of the errors?
 
-  golangci-lint:
-    name: runner / golangci-lint
+  golangci-lint-prebuilt:
+    name: runner / golangci-lint (pre-build docker image)
     runs-on: ubuntu-latest
     steps:
       - name: Check out code into the Go module directory
         uses: actions/checkout@v1
       - name: golangci-lint
-        uses: docker://reviewdog/action-golangci-lint:v1 # Pre-built image
-        # uses: reviewdog/action-golangci-lint@v1 # Build with Dockerfile
-        # uses: docker://reviewdog/action-golangci-lint:v1.0.2 # Can use specific version.
-        # uses: reviewdog/action-golangci-lint@v1.0.2 # Can use specific version.
+        uses: docker://kyoh86/action-golangci-lint:v1 # Pre-built image
         with:
-          github_token: ${{ secrets.github_token }}
-          # Can pass --config flag to change golangci-lint behavior and target
-          # directory.
           golangci_lint_flags: "--config=.github/.golangci.yml ./testdata"
 
-  # Use golint via golangci-lint binary with "warning" level.
+  golangci-lint-dockerfile:
+    name: runner / golangci-lint (Dockerfile)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v1
+      - name: golangci-lint w/ Dockerfile
+        uses: kyoh86/action-golangci-lint@v1 # Build with Dockerfile
+        with:
+          golangci_lint_flags: "./testdata"
+
   golint:
     name: runner / golint
     runs-on: ubuntu-latest
@@ -96,46 +78,30 @@ jobs:
       - name: Check out code into the Go module directory
         uses: actions/checkout@v1
       - name: golint
-        uses: reviewdog/action-golangci-lint@v1
+        uses: docker://kyoh86/action-golangci-lint:v1
         with:
-          github_token: ${{ secrets.github_token }}
-          golangci_lint_flags: "--disable-all -E golint"
-          tool_name: golint # Change reporter name.
-          level: warning # GitHub Status Check won't become failure with this level.
-
-  # You can add more and more supported linters with different config.
-  errcheck:
-    name: runner / errcheck
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out code into the Go module directory
-        uses: actions/checkout@v1
-      - name: errcheck
-        uses: reviewdog/action-golangci-lint@v1
-        with:
-          github_token: ${{ secrets.github_token }}
-          golangci_lint_flags: "--disable-all -E errcheck"
-          tool_name: errcheck
-          level: info
+          golangci_lint_flags: "--disable-all -E golint ./testdata"
 ```
 
 ### All-in-one golangci-lint configuration without config file
 
-#### [.github/workflows/reviewdog.yml](.github/workflows/reviewdog.yml)
+#### [.github/workflows/allinone.yml](.github/workflows/allinone.yml)
 
 ```yml
-name: reviewdog
-on: [pull_request]
+name: golanci-lint
+on: [push]
 jobs:
-  golangci-lint:
-    name: runner / golangci-lint
+  # NOTE: golangci-lint doesn't report multiple errors on the same line from
+  # different linters and just report one of the errors?
+
+  golangci-lint-all-in-one:
+    name: runner / golangci-lint-all-in-one
     runs-on: ubuntu-latest
     steps:
       - name: Check out code into the Go module directory
         uses: actions/checkout@v1
-      - name: golangci-lint
-        uses: reviewdog/action-golangci-lint@v1
+      - name: golangci-lint (All-In-One config)
+        uses: docker://kyoh86/action-golangci-lint:v1
         with:
-          github_token: ${{ secrets.github_token }}
-          golangci_lint_flags: "--enable-all --exclude-use-default=false"
+          golangci_lint_flags: "--enable-all --exclude-use-default=false ./testdata"
 ```
