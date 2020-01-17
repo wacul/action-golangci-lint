@@ -1,6 +1,6 @@
 name: 'Run golangci-lint'
 description: 'Run golangci-lint on push.'
-author: 'kyoh86 (forked from reviewdog)'
+author: 'wacul (forked from reviewdog)'
 inputs:
   golangci_lint_flags:
     description: 'golangci-lint flags. (golangci-lint run --out-format=line-number <golangci_lint_flags>)'
